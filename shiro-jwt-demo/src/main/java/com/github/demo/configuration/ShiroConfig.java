@@ -37,7 +37,7 @@ public class ShiroConfig {
         filterRegistration.addInitParameter("targetFilterLifecycle", "true");
         filterRegistration.setAsyncSupported(true);
         filterRegistration.setEnabled(true);
-        filterRegistration.setDispatcherTypes(DispatcherType.REQUEST);
+        filterRegistration.setDispatcherTypes(DispatcherType.REQUEST,DispatcherType.ASYNC);
 
         return filterRegistration;
     }
@@ -74,7 +74,7 @@ public class ShiroConfig {
      */
     @Bean("shiroFilter")
     public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager, UserService userService) {
-        ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
+    	ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         factoryBean.setSecurityManager(securityManager);
         Map<String, Filter> filterMap = factoryBean.getFilters();
         filterMap.put("authcToken", createAuthFilter(userService));

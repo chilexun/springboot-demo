@@ -1,8 +1,10 @@
 package com.github.demo.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import com.github.demo.dto.UserDto;
  */
 @Service
 public class UserService {
+	
+	private static final String encryptSalt = "F12839WhsnnEV$#23b";
 
 	@Autowired
 	private StringRedisTemplate redisTemplate;
@@ -24,7 +28,7 @@ public class UserService {
      * @param userDto
      */
     public String generateJwtToken(String username) {
-    	String salt = JwtUtils.generateSalt();
+    	String salt = "12345";//JwtUtils.generateSalt();
     	/**
     	 * @todo 将salt保存到数据库或者缓存中
     	 * redisTemplate.opsForValue().set("token:"+username, salt, 3600, TimeUnit.SECONDS);
@@ -38,7 +42,7 @@ public class UserService {
      * @return
      */
     public UserDto getJwtTokenInfo(String username) {
-    	String salt = null;
+    	String salt = "12345";
     	/**
     	 * @todo 从数据库或者缓存中取出jwt token生成时用的salt
     	 * salt = redisTemplate.opsForValue().get("token:"+username);
@@ -67,7 +71,11 @@ public class UserService {
      * @return
      */
     public UserDto getUserInfo(String userName) {
-    	return null;
+    	UserDto user = new UserDto();
+    	user.setUserId(1L);
+    	user.setUsername("admin");
+    	user.setEncryptPwd(new Sha256Hash("123456", encryptSalt).toHex());
+    	return user;
     }
     
     /**
@@ -76,7 +84,7 @@ public class UserService {
      * @return
      */
     public List<String> getUserRoles(Long userId){
-    	return null;
+    	return Arrays.asList("admin");
     }
 
 }

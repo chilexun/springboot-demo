@@ -5,6 +5,7 @@ import com.github.demo.configuration.JwtUtils;
 import com.github.demo.dto.UserDto;
 import com.github.demo.service.UserService;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.shiro.authc.AuthenticationException;
@@ -15,6 +16,8 @@ import org.apache.shiro.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -40,18 +43,24 @@ public class JwtAuthFilter extends AuthenticatingFilter {
         HttpServletRequest httpServletRequest = WebUtils.toHttp(request);
         if (httpServletRequest.getMethod().equals(RequestMethod.OPTIONS.name())) //对于OPTION请求做拦截，不做token校验
             return false;
+
         return super.preHandle(request, response);
     }
 
     @Override
     protected void postHandle(ServletRequest request, ServletResponse response){
         this.fillCorsHeader(WebUtils.toHttp(request), WebUtils.toHttp(response));
+        request.setAttribute("jwtShiroFilter.FILTERED", true);
     }
 
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
         if(this.isLoginRequest(request, response))
             return true;
+        Boolean afterFiltered = (Boolean)(request.getAttribute("jwtShiroFilter.FILTERED"));
+        if( BooleanUtils.isTrue(afterFiltered))
+        	return true;
+
         boolean allowed = false;
         try {
             allowed = executeLogin(request, response);
